@@ -17,5 +17,11 @@ module.exports = merge(common, {
         open: true,
         // host: '0.0.0.0', // enable to access from other devices on the network
         // https: true // enable when HTTPS is needed (like in WebXR)
+        proxy: {
+            '/rest': {
+                target: 'https://api.n2yo.com',
+                secure: false
+            }
+        }
     },
 });

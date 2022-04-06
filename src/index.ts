@@ -8,7 +8,8 @@ const getModuleToLoad = (): string | undefined =>
 
 export const babylonInit = async (): Promise<void> => {
     // get the module to load
-    const moduleName = getModuleToLoad();
+    //const moduleName = getModuleToLoad();
+    const moduleName = "earthGlobe";
     const createSceneModule = await getSceneModuleWithName(moduleName);
     const engineType =
         location.search.split("engine=")[1]?.split("&")[0] || "webgl";
