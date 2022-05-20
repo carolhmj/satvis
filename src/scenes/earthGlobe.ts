@@ -1,4 +1,4 @@
-import { ArcRotateCamera, AxesViewer, Color3, HemisphericLight, MeshBuilder, StandardMaterial, Texture, Tools, Vector3 } from "@babylonjs/core";
+import { ArcRotateCamera, AxesViewer, Color3, HemisphericLight, MeshBuilder, StandardMaterial, Texture, Tools, Vector3, TransformNode, FreeCamera } from "@babylonjs/core";
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
 import { AdvancedDynamicTexture } from "@babylonjs/gui";
@@ -28,18 +28,26 @@ class EarthGlobe implements CreateSceneClass {
         //const axes = new AxesViewer(scene, 3);
     
         // Create camera
-        const camera = new ArcRotateCamera("camera", 0, 0, 5, new Vector3(0, 0, 0));
-        camera.invertRotation = true;
-        camera.upperBetaLimit = Tools.ToRadians(360);
-        camera.beta = Tools.ToRadians(270);
+        const camera = new ArcRotateCamera("camera", 0, Tools.ToRadians(90), 5, new Vector3(0, 0, 0));
+        
+        //const camera = new FreeCamera("camera", new Vector3(0, 0, -5));
+        //camera.invertRotation = true;
+        //camera.upperBetaLimit = Tools.ToRadians(360);
+        //camera.beta = Tools.ToRadians(270);
         camera.attachControl(canvas);
+
+        const sceneRoot = new TransformNode("sceneRoot");
+        //sceneRoot.rotation.y = 0;
+        sceneRoot.rotation.z = Tools.ToRadians(180);
 
         // Create earth sphere
         const earth = MeshBuilder.CreateSphere("earth", {diameter: 2});
         earth.material = this.createEarthMaterial();
+        earth.parent = sceneRoot;
 
         // Create lights
         const light = new HemisphericLight("light", new Vector3(1,1,0), scene);
+        light.parent = sceneRoot;
 
         // Create UI 
         const ui = AdvancedDynamicTexture.CreateFullscreenUI("ui");
@@ -51,6 +59,7 @@ class EarthGlobe implements CreateSceneClass {
         const pos = Coordinates.SphericalToCartesian(1, 0, 1);
         console.log('pos of point 0, 0', pos);
         pt.position = pos;
+        pt.parent = sceneRoot;
 
         const homeLat = -3.742214;
         const homeLon = -38.5375256;
@@ -60,10 +69,18 @@ class EarthGlobe implements CreateSceneClass {
         const pos2 = Coordinates.SphericalToCartesian(1, homeLat, homeLon);
         console.log('pos of point fortaleza', pos2);
         pt2.position = pos2;
+        pt2.parent = sceneRoot;
 
-        const satMan = new SatelliteManager(scene, ui);
+        const satMan = new SatelliteManager(scene, ui, sceneRoot);
 
-        await satMan.initializeSatellites(homeLat, homeLon, 26);
+        satMan.initializeSatellites(homeLat, homeLon, 26).then(() => {
+            console.log('sats initialized');
+            satMan.buildAllSatellitesAnimations().then(() => {
+                console.log('all sats animated');
+            })
+        });
+
+
 
         // Add picking
         /*scene.onPointerPick = (evt, pickInfo) =>{

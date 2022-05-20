@@ -13,6 +13,7 @@
 		"preserveConstEnums":true,
         "sourceMap": true,
         "rootDir": "src",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true
 	}
 }
